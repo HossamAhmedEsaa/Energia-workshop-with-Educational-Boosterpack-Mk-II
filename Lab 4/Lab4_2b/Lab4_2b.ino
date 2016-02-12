@@ -1,50 +1,71 @@
 /*
-
- Resolution for Lab 4, 2.b) for the 
+  Resolution for Lab 4, 2.b) for the 
  Energia workshop with Educational Boosterpack Mk II by Luís Afonso
  
- Made in 13/12/2015 by Luís Afonso
+ Made in 12/02/2016 by Luís Afonso
  */
 
-// The LED used is the Red LED on the educational boosterpack
-#define LED 39
-
-/* If using a MSP430 the longs are necessary */
-long Time_On = 0; //
-long Time_Off = 0; //
-long Period = 2000; // 2 seconds
+/* Macros for the accelerometer pins */
+#define Acc_Xaxis_Pin 23
+#define Acc_Yaxis_Pin 24
+#define Acc_Zaxis_Pin 25
 
 
-void setup() {                
-  // initialize the digital pin as an output.
-  pinMode(LED, OUTPUT); 
+/*
+  I tested this values on my boosterpack using 2.a).
+  You should test your own values since they can vary.
+*/
+#define X_MAX 2871
+#define X_MIN 1249
+#define Y_MAX 2890
+#define Y_MIN 1230
+#define Z_MAX 2839
+#define Z_MIN 1200
+#define MARGIN 50
 
-  /* Test a 50% duty */
-  Generate_PWM(50);
+void setup()
+{
+
+  /* Initialize serial at 9600 */
+  Serial.begin(9600);
 }
 
-// the loop routine runs over and over again forever:
-void loop() {
+void loop()
+{
+  /* Read and store the analog value at the joystick X axis pin in Xaxis_Value */
+  int Xaxis_Value = analogRead(Acc_Xaxis_Pin);
+  /* Read and store the analog value at the joystick Y axis pin in Yaxis_Value */
+  int Yaxis_Value = analogRead(Acc_Yaxis_Pin);
+  /* Read and store the analog value at the joystick Y axis pin in Yaxis_Value */
+  int Zaxis_Value = analogRead(Acc_Zaxis_Pin);
 
-  digitalWrite(LED, HIGH);   
-  delay(Time_On);            
-  digitalWrite(LED, LOW);    
-  delay(Time_Off);                
+
+
+  /*
+    Remember, X_MAX - MARGIN. While X_MIN + MARGIN. It would
+    not make sense have X_MIN-MARGIN.
+  */
+  if(Xaxis_Value > X_MAX-MARGIN)
+    Serial.println("X is parallel to gravity and facing up");
+  else if(Xaxis_Value < X_MIN+MARGIN)
+    Serial.println("X is parallel to gravity and facing down");
+  else if(Yaxis_Value > Y_MAX-MARGIN)
+    Serial.println("Y is parallel to gravity and facing up");
+  else if(Yaxis_Value < Y_MIN+MARGIN)
+    Serial.println("Y is parallel to gravity and facing down");
+  else if(Zaxis_Value > Z_MAX-MARGIN)
+    Serial.println("Z is parallel to gravity and facing up");
+  else if(Zaxis_Value < Z_MIN+MARGIN)
+    Serial.println("Z is parallel to gravity and facing down");
+  else
+    Serial.println("No axis parallel");
+
+
+
+  delay(100);
+
 
 }
 
-void Generate_PWM(int _Duty){
 
-  /* You will find out later that it's a 
-  good idea to avoid using numbers with decimals.
-    That's why here you first multiply the Period
-  by the duty and then divide by 100.Instead of doing 
-  duty/100 to get the percentage from 0 to 1 first
-  */    
-  Time_On = (Period * _Duty)/100;
-  
-  /* The off time then it's simply what's 
-  left over after the on time */
-  Time_Off = Period - Time_On;      
-}
 
